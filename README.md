@@ -8,13 +8,18 @@ Bash scripts to automatically setup a GPU cracking rig from a base-install of Ub
 * Stage 3: Build hashcat from source with GPU support and install; Build john from source with GPU support and install.
 
 # Usage
-1. Execute Stage 1 (gpucrack-stage1.sh) as root and reboot.
-2. Execute Stage 2 (gpucrack-stage2.sh) as root. If instructed at the end of execution, reboot and re-execute Stage 2 as root.
-3. Execute Stage 3 (gpucrack-stage3.sh) as root.
-4. (Recommended) Run test suites of both hashcat at john (may take a while to complete)
+1. Download the project master.zip, extract, navigate to the GPU-Cracking-Rig-Builder and add execute permissions to the stage scripts.
+	1. wget https://github.com/Bort-Millipede/GPU-Cracking-Rig-Builder/archive/master.zip
+	2. unzip master.zip
+	3. cd GPU-Cracking-Rig-Builder-master
+	4. chmod +x *.sh
+2. Execute Stage 1 (gpucrack-stage1.sh) as root and reboot.
+3. Execute Stage 2 (gpucrack-stage2.sh) as root. If instructed at the end of execution, reboot and re-execute Stage 2 as root.
+4. Execute Stage 3 (gpucrack-stage3.sh) as root.
+5. (Recommended) Run test suites of both hashcat at john (may take a while to complete)
 	1. hashcat --benchmark
 	2. cd /usr/share/john; ./john --test=0
-5. To use hashcat, execute "hashcat ..." from any location. To use john, execute "./john ..." from /usr/share/john.
+6. To use hashcat, execute "hashcat ..." from any location. To use john, execute "./john ..." from /usr/share/john.
 
 # Development Notes
 The bash scripts were developed and tested using the following setup:
