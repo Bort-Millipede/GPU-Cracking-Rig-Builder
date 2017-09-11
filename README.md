@@ -5,18 +5,19 @@ Bash scripts to automatically setup a GPU cracking rig from a base-install of Ub
 * Stage 2: Install build-essential and linux-headers packages and remove all currently-installed nvidia* packages, then:
 	* If Nouveau driver is detected, blacklist Nouveau driver. After execution, a system reboot and another execution of Stage 2 will be required.
 	* Otherwise, install NVIDIA driver.
-* Stage 3: Build hashcat from source with GPU support and install; Build john from source with GPU support and install.
+* Stage 3: Build hashcat from source with GPU support and install; Build john from source with GPU support and install (to /usr/share/john); create directory for wordlists (/usr/share/wordlists).
 
 # Usage
 1. Download the project master.zip, extract, navigate to the GPU-Cracking-Rig-Builder and add execute permissions to the stage scripts.
-	1. wget https://github.com/Bort-Millipede/GPU-Cracking-Rig-Builder/archive/master.zip
-	2. unzip master.zip
-	3. cd GPU-Cracking-Rig-Builder-master
-	4. chmod +x *.sh
+	1. (if 'unzip' utility is not installed, run as root) apt-get install unzip
+	2. wget https://github.com/Bort-Millipede/GPU-Cracking-Rig-Builder/archive/master.zip
+	3. unzip master.zip
+	4. cd GPU-Cracking-Rig-Builder-master
+	5. chmod +x *.sh
 2. Execute Stage 1 (gpucrack-stage1.sh) as root and reboot.
 3. Execute Stage 2 (gpucrack-stage2.sh) as root. If instructed at the end of execution, reboot and re-execute Stage 2 as root.
 4. Execute Stage 3 (gpucrack-stage3.sh) as root.
-5. (Recommended) Run test suites of both hashcat at john (may take a while to complete)
+5. (Recommended) Run test suites of both hashcat and john (may take a while to complete)
 	1. hashcat --benchmark
 	2. cd /usr/share/john; ./john --test=0
 6. To use hashcat, execute "hashcat ..." from any location. To use john, execute "./john ..." from /usr/share/john.

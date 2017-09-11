@@ -1,9 +1,9 @@
 #! /bin/bash
 
-# Stage 3 v0.1
-# 4/8/2017
+# Stage 3 v0.1.1
+# 9/11/2017
 
-### start stage 3###
+###start stage 3###
 echo -e "GPU Password Cracking Builder (NVIDIA only) v0.1"
 echo -e "Jeffrey Cap (Bort-Millipede, https://twitter.com/Bort_Millipede)"
 echo -e "\nStage 3: install hashcat and John The Ripper with GPU support\n"
@@ -77,6 +77,8 @@ else
 	make -s install
 	cd ../run
 	mkdir -p /usr/share/john
+	rm -rf /usr/share/john/*
+	chmod -R +w /usr/share/john
 	cp -rf * /usr/share/john/
 	echo -e "\njohn built and installed successfully to /usr/share/john! To use john, navigate to /usr/share/john and execute:\n\t./john\n"
 	JTR=0
@@ -85,13 +87,18 @@ fi
 
 cd $ORIG_DIR
 
+#create wordlists directory#
+mkdir -p /usr/share/wordlists
+chmod -R +w /usr/share/wordlists
+#end create wordlists directory#
+
 if [ $HC -ne 0 ] && [ $JTR -ne 0 ]
 then
 	echo -e "\nhashcat and john built successfully, but unable to communicate with GPU device(s) so hashcat and john not installed. Please resolve this issue then re-execute stage 3 as root to install hashcat and john.\n"
 else
 	echo -e "\nStage 3 complete, hashcat and john installed successfully!\nTo ensure all is working, both installations should be tested as follows:"
 	echo -e "\thashcat: hashcat --benchmark   #This will take a long time to complete!"
-	echo -e "\tjohn: ./john --test=0   #This may take a long time to complete!"
+	echo -e "\tjohn: cd /usr/share/john; ./john --test=0   #This may take a long time to complete!"
 	rm -rf $TMP_DIR
 fi
 
