@@ -89,7 +89,7 @@ cd $ORIG_DIR
 
 #create wordlists directory#
 mkdir -p /usr/share/wordlists
-chmod -R +w /usr/share/wordlists
+chmod 777 /usr/share/wordlists
 #end create wordlists directory#
 
 if [ $HC -ne 0 ] && [ $JTR -ne 0 ]
