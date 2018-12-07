@@ -1,10 +1,10 @@
 #! /bin/bash
 
-# Stage 2 v0.1
-# 4/8/2017
+# Stage 2 v0.1.2
+# XX/XX/2018
 
 ###start stage 2###
-echo -e "GPU Password Cracking Builder (NVIDIA only) v0.1"
+echo -e "GPU Password Cracking Builder (NVIDIA only) v0.1.2"
 echo -e "Jeffrey Cap (Bort-Millipede, https://twitter.com/Bort_Millipede)"
 echo -e "\nStage 2: install build-essential and latest linux-headers, remove all currently installed nvidia packages, and install NVIDIA drivers OR blacklist nouveau\n"
 
@@ -27,11 +27,11 @@ aptitude install -y build-essential linux-headers-$(uname -r)
 
 aptitude remove -y nvidia*
 
-VER=(`wget -q -O - http://download.nvidia.com/XFree86/Linux-x86_64/latest.txt`)
+VER=`wget -q -O - https://download.nvidia.com/XFree86/Linux-x86_64/latest.txt | cut -d" " -f 1`
 
 if [ ! -e "$TMP_DIR/NVIDIA" ]
 then
-	wget http://us.download.nvidia.com/XFree86/Linux-x86_64/$VER/NVIDIA-Linux-x86_64-$VER.run -O $TMP_DIR/NVIDIA
+	wget https://us.download.nvidia.com/XFree86/Linux-x86_64/$VER/NVIDIA-Linux-x86_64-$VER.run -O $TMP_DIR/NVIDIA
 fi
 
 cd $TMP_DIR
@@ -56,15 +56,16 @@ modinfo nvidia > /dev/null 2>&1
 if [ $? -ne 0 ]
 then
 	update-initramfs -u
-	echo -e "\nNouveau drivers blacklisted! The following Errors displayed by the NVIDIA installer are normal:\n\t\"The Nouveau kernel driver is currently in use by your system...\"\n\t\"Installation has failed...\""
-	echo -e "\nPlease reboot and re-execute stage 2 as root to install NVIDIA drivers"
+	echo -e "\nNouveau drivers blacklisted successfully! The following Errors displayed by the NVIDIA installer are normal:\n\t\"The Nouveau kernel driver is currently in use by your system...\"\n\t\"Installation has failed...\""
+	echo -e "\nStage 2 completed but must be executed again. Please reboot and re-execute Stage 2 as root to install NVIDIA drivers"
 else
-	echo -e "\nStage 2 complete, NVIDIA drivers installed! The following Warnings displayed by the NVIDIA installer are normal:\n\t\"One or more modprobe configuration files to disable Nouveau are already present...\""
+	echo -e "\nNVIDIA drivers installed successfully! The following Warnings displayed by the NVIDIA installer are normal:\n\t\"One or more modprobe configuration files to disable Nouveau are already present...\""
 	echo -e "\t\"nvidia-installer was forced to guess the X library path...\"\n\t\"Unable to find a suitable destination to install 32-bit compatibility libraries...\""
-	echo -e "\nPlease execute stage 3 as root"
+	echo -e "\nStage 2 completed successfully! Please execute Stage 3 as root"
 	rm -rf $TMP_DIR
 fi
 unset VER
 unset TMP_DIR
 unset ORIG_DIR
 ###end stage 2###
+

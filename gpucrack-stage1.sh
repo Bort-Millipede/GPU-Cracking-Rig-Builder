@@ -1,10 +1,10 @@
 #! /bin/bash
 
-# Stage 1 v0.1
-# 4/8/2017
+# Stage 1 v0.1.2
+# XX/XX/2018
 
 ###start stage 1###
-echo -e "GPU Password Cracking Builder (NVIDIA only) v0.1"
+echo -e "GPU Password Cracking Builder (NVIDIA only) v0.1.2"
 echo -e "Jeffrey Cap (Bort-Millipede, https://twitter.com/Bort_Millipede)"
 echo -e "\nStage 1: remove multiarch (32-bit) support from operating system and install all available updates.\n"
 
@@ -20,9 +20,11 @@ then
 fi
 
 dpkg --remove-architecture i386 > /dev/null 2>&1
-apt-get install -y aptitude
+apt install -y aptitude
 aptitude -y update
 aptitude -y full-upgrade
 sync
-echo -e "\nStage 1 complete, 32-bit support removed and system updated! Please reboot and execute stage 2 as root"
+echo -e "\n32-bit support removed and system updated!"
+echo -e "Stage 1 completed successfully! Please reboot and execute Stage 2 as root."
 ###end stage 1###
+
