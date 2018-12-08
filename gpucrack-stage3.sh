@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # Stage 3 v0.1.2
-# XX/XX/2018
+# 12/7/2018
 
 ###start stage 3###
 echo -e "GPU Password Cracking Builder (NVIDIA only) v0.1.2"
@@ -9,7 +9,7 @@ echo -e "Jeffrey Cap (Bort-Millipede, https://twitter.com/Bort_Millipede)"
 echo -e "\nStage 3: install hashcat and John The Ripper with GPU support\n"
 
 if [[ $EUID -ne 0 ]]; then
-   echo "Error: This script must be run as root! exiting..." 
+   echo "Error: This script must be executed as root! exiting..." 
    exit 1
 fi
 
@@ -61,9 +61,7 @@ make install
 ldconfig
 cd $TMP_DIR
 
-aptitude install -y opencl-headers ocl-icd-libopencl1
-aptitude download nvidia-opencl-dev
-dpkg -i nvidia-opencl-dev*.deb
+aptitude install -y opencl-headers ocl-icd-libopencl1 ocl-icd-opencl-dev nvidia-opencl-dev
 
 git clone git://github.com/magnumripper/JohnTheRipper -b bleeding-jumbo john
 cd john/src
@@ -83,7 +81,7 @@ else
 	rm -rf /usr/share/john/*
 	cp -prf * /usr/share/john/
 	chmod -R a+w /usr/share/john
-	echo -e "\njohn built and installed successfully to /usr/share/john!\n"
+	echo -e "\njohn built and installed successfully to /usr/share/john!"
 	JTR=0
 fi
 #end build/install john#
@@ -122,7 +120,7 @@ then
 	echo -e "\nStage 3 completed successfully! hashcat and john built and installed, and Wordlists directory created!"
 	rm -rf $TMP_DIR
 else
-	echo -e "\nStage 3 completed with errors. Please resolve this issue then re-execute stage 3 as root to install john"
+	echo -e "\nStage 3 completed with errors. Please resolve the issue(s), then re-execute stage 3 as root to install john"
 fi
 
 unset TMP_DIR

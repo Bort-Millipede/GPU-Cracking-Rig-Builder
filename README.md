@@ -9,7 +9,7 @@ Bash scripts to automatically setup a GPU cracking rig from a base-install of Ub
 
 # Usage
 1. Download the project master.zip, extract, navigate to the GPU-Cracking-Rig-Builder and add execute permissions to the stage scripts.
-	1. (run as root) apt install -y unzip
+	1. (execute as root) apt install -y unzip wget
 	2. wget https://github.com/Bort-Millipede/GPU-Cracking-Rig-Builder/archive/master.zip -O GPU-Cracking-Rig-Builder-master.zip
 	3. unzip GPU-Cracking-Rig-Builder-master.zip
 	4. cd GPU-Cracking-Rig-Builder-master

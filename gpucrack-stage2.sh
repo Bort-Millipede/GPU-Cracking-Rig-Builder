@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # Stage 2 v0.1.2
-# XX/XX/2018
+# 12/7/2018
 
 ###start stage 2###
 echo -e "GPU Password Cracking Builder (NVIDIA only) v0.1.2"
@@ -9,7 +9,7 @@ echo -e "Jeffrey Cap (Bort-Millipede, https://twitter.com/Bort_Millipede)"
 echo -e "\nStage 2: install build-essential and latest linux-headers, remove all currently installed nvidia packages, and install NVIDIA drivers OR blacklist nouveau\n"
 
 if [[ $EUID -ne 0 ]]; then
-   echo "Error: This script must be run as root! exiting..." 
+   echo "Error: This script must be executed as root! exiting..." 
    exit 1
 fi
 
@@ -25,7 +25,7 @@ ORIG_DIR=`pwd`
 
 aptitude install -y build-essential linux-headers-$(uname -r)
 
-aptitude remove -y nvidia*
+aptitude remove -y nvidia* >&/dev/null
 
 VER=`wget -q -O - https://download.nvidia.com/XFree86/Linux-x86_64/latest.txt | cut -d" " -f 1`
 
@@ -41,7 +41,9 @@ chmod +x ./NVIDIA
 if [ $? -eq 2 ]
 then
 	rm NVIDIA
-	echo -e "\nBad checksum for downloaded NVIDIA installer, please re-run stage 2 as root to re-download NVIDIA installer"
+	echo -e "\nBad checksum for downloaded NVIDIA installer! Please re-execute Stage 2 as root to re-download NVIDIA installer."
+	echo -e "Alternatively, download the NVIDIA installer manually with the following command before re-executing Stage 2 as root:"
+	echo -e "\twget https://us.download.nvidia.com/XFree86/Linux-x86_64/$VER/NVIDIA-Linux-x86_64-$VER.run -O $TMP_DIR/NVIDIA"
 	cd $ORIG_DIR
 	rm -r $TMP_DIR
 	unset VER
@@ -61,7 +63,7 @@ then
 else
 	echo -e "\nNVIDIA drivers installed successfully! The following Warnings displayed by the NVIDIA installer are normal:\n\t\"One or more modprobe configuration files to disable Nouveau are already present...\""
 	echo -e "\t\"nvidia-installer was forced to guess the X library path...\"\n\t\"Unable to find a suitable destination to install 32-bit compatibility libraries...\""
-	echo -e "\nStage 2 completed successfully! Please execute Stage 3 as root"
+	echo -e "\nStage 2 completed successfully! Please execute Stage 3 as root\n"
 	rm -rf $TMP_DIR
 fi
 unset VER

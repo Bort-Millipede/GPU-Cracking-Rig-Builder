@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # Stage 1 v0.1.2
-# XX/XX/2018
+# 12/7/2018
 
 ###start stage 1###
 echo -e "GPU Password Cracking Builder (NVIDIA only) v0.1.2"
@@ -9,7 +9,7 @@ echo -e "Jeffrey Cap (Bort-Millipede, https://twitter.com/Bort_Millipede)"
 echo -e "\nStage 1: remove multiarch (32-bit) support from operating system and install all available updates.\n"
 
 if [[ $EUID -ne 0 ]]; then
-   echo "Error: This script must be run as root! exiting..." 
+   echo "Error: This script must be executed as root! exiting..." 
    exit 1
 fi
 
