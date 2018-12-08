@@ -43,5 +43,5 @@ Resources leveraged during development are as follows:
 The developer provides the software for free without warranty, and assume no responsibility for any damage caused to systems by using the software. It is the responsibility of the user to abide by all local, state and federal laws while using the software.
 
 # Copyright
-(C) 2017 Jeffrey Cap (Bort_Millipede)
+(C) 2017, 2018 Jeffrey Cap (Bort_Millipede)
 
