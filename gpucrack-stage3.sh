@@ -1,21 +1,28 @@
 #! /bin/bash
 
-# Stage 3 v0.1.2
-# 12/7/2018
+# Stage 1 v0.2
+# 4/X/2020
 
 ###start stage 3###
 echo -e "GPU Password Cracking Builder (NVIDIA only) v0.1.2"
 echo -e "Jeffrey Cap (Bort-Millipede, https://twitter.com/Bort_Millipede)"
 echo -e "\nStage 3: install hashcat and John The Ripper with GPU support\n"
 
-if [[ $EUID -ne 0 ]]; then
-   echo "Error: This script must be executed as root! exiting..." 
-   exit 1
+if [[ $EUID -ne 0 ]]
+then
+	echo "Error: This script must be executed as root! exiting..." 
+	exit 1
 fi
 
 if [ "$(uname -m)" != "x86_64" ]
 then
-	echo "Error: this script is only compatible with 64-bit Debian-based Linux systems! exiting..."
+	echo "Error: this script is only compatible with 64-bit systems! exiting..."
+	exit 1
+fi
+
+if [ ! -f "/etc/debian_version" ]
+then
+	echo "Error: this script is only compatible with Debian-based Linux systems! exiting..."
 	exit 1
 fi
 
@@ -49,7 +56,7 @@ cd $TMP_DIR
 
 #build/install john#
 JTR=-1
-aptitude install -y libssl-dev yasm libgmp-dev libpcap-dev libnss3-dev libkrb5-dev pkg-config libbz2-dev zlib1g-dev subversion cmake bison flex
+apt install -y libssl-dev yasm libgmp-dev libpcap-dev libnss3-dev libkrb5-dev pkg-config libbz2-dev zlib1g-dev subversion cmake bison flex
 
 svn checkout https://github.com/teeshop/rexgen.git rexgen
 cd rexgen/trunk/src/
@@ -61,7 +68,7 @@ make install
 ldconfig
 cd $TMP_DIR
 
-aptitude install -y opencl-headers ocl-icd-libopencl1 ocl-icd-opencl-dev nvidia-opencl-dev
+apt install -y opencl-headers ocl-icd-libopencl1 ocl-icd-opencl-dev nvidia-opencl-dev
 
 git clone git://github.com/magnumripper/JohnTheRipper -b bleeding-jumbo john
 cd john/src

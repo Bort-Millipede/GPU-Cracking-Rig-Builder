@@ -1,37 +1,44 @@
 #! /bin/bash
 
-# Stage 2 v0.1.2
-# 12/7/2018
+# Stage 1 v0.2
+# 4/X/2020
 
 ###start stage 2###
 echo -e "GPU Password Cracking Builder (NVIDIA only) v0.1.2"
 echo -e "Jeffrey Cap (Bort-Millipede, https://twitter.com/Bort_Millipede)"
 echo -e "\nStage 2: install build-essential and latest linux-headers, remove all currently installed nvidia packages, and install NVIDIA drivers OR blacklist nouveau\n"
 
-if [[ $EUID -ne 0 ]]; then
-   echo "Error: This script must be executed as root! exiting..." 
-   exit 1
+if [[ $EUID -ne 0 ]]
+then
+	echo "Error: This script must be executed as root! exiting..." 
+	exit 1
 fi
 
 if [ "$(uname -m)" != "x86_64" ]
 then
-	echo "Error: this script is only compatible with 64-bit Debian-based Linux systems! exiting..."
+	echo "Error: this script is only compatible with 64-bit systems! exiting..."
 	exit 1
 fi
 
-TMP_DIR="gpucrack-tmp"
-mkdir -p $TMP_DIR
+if [ ! -f "/etc/debian_version" ]
+then
+	echo "Error: this script is only compatible with Debian-based Linux systems! exiting..."
+	exit 1
+fi
+
 ORIG_DIR=`pwd`
+TMP_DIR="$ORIG_DIR/gpucrack-tmp"
+mkdir -p $TMP_DIR
 
-aptitude install -y build-essential linux-headers-$(uname -r)
+apt install -y build-essential linux-headers-$(uname -r)
 
-aptitude remove -y nvidia* >&/dev/null
+apt remove --purge -y nvidia* >&/dev/null
 
 VER=`wget -q -O - https://download.nvidia.com/XFree86/Linux-x86_64/latest.txt | cut -d" " -f 1`
 
 if [ ! -e "$TMP_DIR/NVIDIA" ]
 then
-	wget https://us.download.nvidia.com/XFree86/Linux-x86_64/$VER/NVIDIA-Linux-x86_64-$VER.run -O $TMP_DIR/NVIDIA
+	wget https://us.download.nvidia.com/XFree86/Linux-x86_64/$VER/NVIDIA-Linux-x86_64-$VER-no-compat32.run -O $TMP_DIR/NVIDIA
 fi
 
 cd $TMP_DIR
@@ -43,9 +50,8 @@ then
 	rm NVIDIA
 	echo -e "\nBad checksum for downloaded NVIDIA installer! Please re-execute Stage 2 as root to re-download NVIDIA installer."
 	echo -e "Alternatively, download the NVIDIA installer manually with the following command before re-executing Stage 2 as root:"
-	echo -e "\twget https://us.download.nvidia.com/XFree86/Linux-x86_64/$VER/NVIDIA-Linux-x86_64-$VER.run -O $TMP_DIR/NVIDIA"
+	echo -e "\twget https://us.download.nvidia.com/XFree86/Linux-x86_64/$VER/NVIDIA-Linux-x86_64-$VER-no-compat32.run -O $TMP_DIR/NVIDIA"
 	cd $ORIG_DIR
-	rm -r $TMP_DIR
 	unset VER
 	unset TMP_DIR
 	unset ORIG_DIR
@@ -61,8 +67,8 @@ then
 	echo -e "\nNouveau drivers blacklisted successfully! The following Errors displayed by the NVIDIA installer are normal:\n\t\"The Nouveau kernel driver is currently in use by your system...\"\n\t\"Installation has failed...\""
 	echo -e "\nStage 2 completed but must be executed again. Please reboot and re-execute Stage 2 as root to install NVIDIA drivers"
 else
-	echo -e "\nNVIDIA drivers installed successfully! The following Warnings displayed by the NVIDIA installer are normal:\n\t\"One or more modprobe configuration files to disable Nouveau are already present...\""
-	echo -e "\t\"nvidia-installer was forced to guess the X library path...\"\n\t\"Unable to find a suitable destination to install 32-bit compatibility libraries...\""
+	echo -e "\nNVIDIA drivers (v$VER) installed successfully! The following Warnings displayed by the NVIDIA installer are normal:\n\t\"One or more modprobe configuration files to disable Nouveau are already present...\""
+	echo -e "\t\"nvidia-installer was forced to guess the X library path...\""
 	echo -e "\nStage 2 completed successfully! Please execute Stage 3 as root\n"
 	rm -rf $TMP_DIR
 fi
