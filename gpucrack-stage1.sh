@@ -1,10 +1,10 @@
 #! /bin/bash
 
 # Stage 1 v0.2
-# 4/X/2020
+# 5/X/2020
 
 ###start stage 1###
-echo -e "GPU Password Cracking Builder (NVIDIA only) v0.1.2"
+echo -e "GPU Password Cracking Rig Builder (NVIDIA only) v0.1.2"
 echo -e "Jeffrey Cap (Bort-Millipede, https://twitter.com/Bort_Millipede)"
 echo -e "\nStage 1: remove multiarch (32-bit) support from operating system (if enabled), and install all available updates.\n"
 

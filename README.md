@@ -9,11 +9,10 @@ Bash scripts to automatically setup a GPU cracking rig from a base-install of Ub
 
 # Usage
 1. Download the project master.zip, extract, navigate to the GPU-Cracking-Rig-Builder and add execute permissions to the stage scripts.
-	1. (execute as root) ```apt install -y unzip wget```
-	2. ```wget https://github.com/Bort-Millipede/GPU-Cracking-Rig-Builder/archive/master.zip -O GPU-Cracking-Rig-Builder-master.zip```
-	3. ```unzip GPU-Cracking-Rig-Builder-master.zip```
-	4. ```cd GPU-Cracking-Rig-Builder-master```
-	5. ```chmod +x *.sh```
+	1. (execute as root) ```apt install -y git```
+	2. ```git clone https://github.com/Bort-Millipede/GPU-Cracking-Rig-Builder.git```
+	3. ```cd GPU-Cracking-Rig-Builder```
+	4. ```chmod +x *.sh```
 2. Execute Stage 1 (gpucrack-stage1.sh) as root and reboot.
 3. Execute Stage 2 (gpucrack-stage2.sh) as root. If instructed at the end of execution, reboot and re-execute Stage 2 as root.
 4. Execute Stage 3 (gpucrack-stage3.sh) as root.
@@ -28,7 +27,7 @@ The bash scripts were developed and tested using the following setup:
 
 * HP Z800 Server Workstation with dual NVIDIA Quadro K600 GPUs installed.
 * VMWare ESXi 6.5 installed, "Hardware Passthrough" configured for both NVIDIA cards.
-* VM created with 8 CPUs, 16GB Memory, and Ubuntu Server 18.04 64-bit installed.
+* VM created with 4 CPUs, 16GB Memory, and Ubuntu Server 18.04 64-bit installed.
 	* Configuration parameter 'hypervisor.cpuid.v0 = FALSE' added to VM in order make NVIDIA cards work properly.
 
 Resources leveraged during development are as follows:

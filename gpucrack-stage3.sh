@@ -1,12 +1,12 @@
 #! /bin/bash
 
-# Stage 1 v0.2
-# 4/X/2020
+# Stage 3 v0.2
+# 5/X/2020
 
 ###start stage 3###
-echo -e "GPU Password Cracking Builder (NVIDIA only) v0.1.2"
+echo -e "GPU Password Cracking Rig Builder (NVIDIA only) v0.1.2"
 echo -e "Jeffrey Cap (Bort-Millipede, https://twitter.com/Bort_Millipede)"
-echo -e "\nStage 3: install hashcat and John The Ripper with GPU support\n"
+echo -e "\nStage 3: install hashcat and John The Ripper with GPU support, and create wordlists directory (if not already created)\n"
 
 if [[ $EUID -ne 0 ]]
 then
@@ -42,7 +42,7 @@ make
 ./hashcat -I
 if [ $? -eq 255 ]
 then
-	echo -e "Error occurred in hashcat communicating with installed GPU(s)!"
+	echo -e "Error occurred in hashcat while attempting to communicate with installed GPU(s)!"
 	echo -e "If this system is running inside an ESXi virtual machine, make sure that \"Hardware Passthrough\" is enabled for the GPU device(s) and that the following configuration parameter is added to this VM:"
 	echo -e "\t\thypervisor.cpuid.v0 = FALSE"
 else
@@ -56,29 +56,44 @@ cd $TMP_DIR
 
 #build/install john#
 JTR=-1
-apt install -y libssl-dev yasm libgmp-dev libpcap-dev libnss3-dev libkrb5-dev pkg-config libbz2-dev zlib1g-dev subversion cmake bison flex
+apt install -y libssl-dev yasm libgmp-dev libpcap-dev libnss3-dev libkrb5-dev pkg-config libbz2-dev zlib1g-dev opencl-headers ocl-icd-libopencl1 ocl-icd-opencl-dev nvidia-opencl-dev
 
-svn checkout https://github.com/teeshop/rexgen.git rexgen
-cd rexgen/trunk/src/
-mkdir -p build
-cd build
-cmake ..
-make
-make install
-ldconfig
-cd $TMP_DIR
-
-apt install -y opencl-headers ocl-icd-libopencl1 ocl-icd-opencl-dev nvidia-opencl-dev
+REXGEN=1
+which rexgen > /dev/null 2>&1
+if [ $? -eq 0 ]
+then
+	VER=`rexgen -v 2>&1 | head -n1 | cut -d"-" -f 2`
+	if [ "$VER" == "2.0.8" ]
+	then
+		REXGEN=0
+	fi
+fi
+if [ $REXGEN -eq 1 ]
+then 
+	apt install -y cmake bison flex
+	git clone https://github.com/vay3t/rexgen-john.git rexgen
+	cd rexgen/src/
+	mkdir -p build
+	cd build
+	cmake ..
+	make
+	make install
+	ldconfig
+	cd $TMP_DIR
+else
+	echo -e "\nRexgen v2.0.8 already installed. Now building john"
+fi
+unset REXGEN
 
 git clone git://github.com/magnumripper/JohnTheRipper -b bleeding-jumbo john
 cd john/src
-./configure
+./configure --enable-rexgen
 make clean
 make -j4
 ../run/john --list=opencl-devices 2>&1 | grep "No OpenCL-capable "
 if [ $? -eq 0 ]
 then
-	echo -e "Error occurred in john communicating with installed GPU(s)!"
+	echo -e "Error occurred in john while attempting to communicate with installed GPU(s)!"
 	echo -e "If this system is running inside an ESXi virtual machine, make sure that \"Hardware Passthrough\" is enabled for the GPU device(s) and that the following lines are added to the .vmx file for this VM:"
 	echo -e "\t\thypervisor.cpuid.v0 = FALSE"
 else
@@ -95,10 +110,13 @@ fi
 
 cd $ORIG_DIR
 
-#create wordlists directory#
-mkdir -p /usr/share/wordlists
-chmod 777 /usr/share/wordlists
-echo -e "\nWordlists directory (/usr/share/wordlists) created!"
+#create wordlists directory (if not already created)#
+if [ ! -d /usr/share/wordlists ]
+then
+	mkdir -p /usr/share/wordlists
+	chmod 777 /usr/share/wordlists
+	echo -e "\nWordlists directory (/usr/share/wordlists) created!"
+fi
 #end create wordlists directory#
 
 if [ $HC -eq 0 ]
@@ -127,7 +145,7 @@ then
 	echo -e "\nStage 3 completed successfully! hashcat and john built and installed, and Wordlists directory created!"
 	rm -rf $TMP_DIR
 else
-	echo -e "\nStage 3 completed with errors. Please resolve the issue(s), then re-execute stage 3 as root to install john"
+	echo -e "\nStage 3 completed with errors. Please resolve the issue(s), then re-execute stage 3 as root to install hashcat and john"
 fi
 
 unset TMP_DIR
