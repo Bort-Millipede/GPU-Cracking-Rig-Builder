@@ -1,12 +1,12 @@
 #! /bin/bash
 
 # Stage 2 v0.1.3
-# 5/X/2020
+# 5/12/2020
 
 ###start stage 2###
 echo -e "GPU Password Cracking Rig Builder (NVIDIA only) v0.1.3"
 echo -e "Jeffrey Cap (Bort-Millipede, https://twitter.com/Bort_Millipede)"
-echo -e "\nStage 2: install NVIDIA driver prerequisites, remove all currently-installed nvidia packages (if any), and install NVIDIA drivers OR blacklist Nouveau drivers\n"
+echo -e "\nStage 2: install NVIDIA driver prerequisites, remove all currently-installed \"nvidia\" packages (if any), and install latest NVIDIA drivers OR blacklist Nouveau drivers\n"
 
 if [[ $EUID -ne 0 ]]
 then
@@ -50,7 +50,7 @@ ORIG_DIR=`pwd`
 TMP_DIR="$ORIG_DIR/gpucrack-tmp"
 mkdir -p $TMP_DIR
 
-echo -e "Installing NVIDIA driver prerequisites, and removing all currently-installed nvidia packages (if any)."
+echo -e "Installing NVIDIA driver prerequisites, and removing all currently-installed \"nvidia\" packages (if any)."
 if [ $VERBOSE -eq 1 ]
 then
 	apt-get install -y build-essential linux-headers-$(uname -r) wget
@@ -63,7 +63,7 @@ echo -e "Prerequisites installed!"
 
 VER=`wget -q -O - https://download.nvidia.com/XFree86/Linux-x86_64/latest.txt | cut -d" " -f 1`
 
-if [ ! -e "$TMP_DIR/NVIDIA" ]
+if [ ! -f "$TMP_DIR/NVIDIA" ]
 then
 	if [ $VERBOSE -eq 1 ]
 	then
@@ -107,22 +107,8 @@ then
 		echo -e "\nNouveau drivers blacklisted successfully!"
 		echo -e "The following Errors displayed by the NVIDIA installer are normal:\n\t\"The Nouveau kernel driver is currently in use by your system...\"\n\t\"Installation has failed...\""
 		echo -e "\nIf Stage 2 has been re-executed without rebooting first, the following Warning displayed by the NVIDIA installer is normal:\n\t\"One or more modprobe configuration files to disable Nouveau are already present...\""
-		echo -e "\nStage 2 completed but must be executed again! Please reboot and re-execute Stage 2 as root to install NVIDIA drivers"
+		echo -e "\nStage 2 completed, but must be executed again! Please reboot and re-execute Stage 2 as root to install NVIDIA drivers"
 	else
-		#start to include logic here for other error, such as:
-		#WARNING: You do not appear to have an NVIDIA GPU supported by the 440.82 NVIDIA Linux graphics
-		#driver installed in this system.  For further details, please see the appendix SUPPORTED
-		#NVIDIA GRAPHICS CHIPS in the README available on the Linux driver download page at
-		#www.nvidia.com.
-		
-		#ERROR: Unable to load the kernel module 'nvidia.ko'.  This happens most frequently when this kernel
-		#module was built against the wrong or improperly configured kernel sources, with a version
-		#of gcc that differs from the one used to build the target kernel, or if another driver, such
-		#as nouveau, is present and prevents the NVIDIA kernel module from obtaining ownership of the
-		#NVIDIA GPU(s), or no NVIDIA GPU installed in this system is supported by this NVIDIA Linux
-		#graphics driver release.
-
-		#
 		echo -e "\nUnknown installation error occurred! Please check the /var/log/nvidia-installer.log file for more information, and re-execute Stage 2 as root when resolved."
 	fi
 else

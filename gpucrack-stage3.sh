@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # Stage 3 v0.1.3
-# 5/X/2020
+# 5/12/2020
 
 ###start stage 3###
 echo -e "GPU Password Cracking Rig Builder (NVIDIA only) v0.1.3"
@@ -74,28 +74,41 @@ then
 	git submodule update --init
 	make clean
 	make
-	./hashcat -I
 else
 	git submodule -q update --init
 	make -s clean
 	make -s
-	./hashcat -I >/dev/null 2>&1
 fi
-if [ $? -eq 255 ]
+if [ -f "hashcat" ]
 then
-	echo -e "Error occurred in hashcat while attempting to communicate with installed GPU(s)!"
-	echo -e "If this system is running inside an ESXi virtual machine, make sure that \"Hardware Passthrough\" is enabled for the GPU device(s) and that the following configuration parameter is added to this VM:"
-	echo -e "\t\thypervisor.cpuid.v0 = FALSE"
-else
 	if [ $VERBOSE -eq 1 ]
 	then
-		make install
+		./hashcat -I
 	else
-		make -s install
+		./hashcat -I >/dev/null 2>&1
 	fi
-	echo -e "hashcat built and installed system-wide successfully!\n"
-	HC=0
+	if [ $? -eq 255 ]
+	then
+		echo -e "Error occurred in hashcat while attempting to communicate with installed GPU(s)!"
+		echo -e "If this system is running inside an ESXi virtual machine, make sure that \"Hardware Passthrough\" is enabled for the GPU device(s) and that the following configuration parameter is added to this VM:"
+		echo -e "\t\thypervisor.cpuid.v0 = FALSE"
+		echo -e "\nhashcat built, but not installed system-wide!\n"
+		HC=1
+	else
+		if [ $VERBOSE -eq 1 ]
+		then
+			make install
+		else
+			make -s install
+		fi
+		echo -e "hashcat built and installed system-wide successfully!\n"
+		HC=0
+	fi
+else
+	echo -e "Error occurred while building hashcat! Not built or installed system-wide!\n"
+	HC=2
 fi
+
 #end build/install hashcat#
 cd $TMP_DIR
 
@@ -104,9 +117,19 @@ cd $TMP_DIR
 JTR=-1
 if [ $VERBOSE -eq 1 ]
 then
-	apt-get install -y libssl-dev yasm libgmp-dev libpcap-dev libnss3-dev libkrb5-dev pkg-config libbz2-dev zlib1g-dev opencl-headers ocl-icd-libopencl1 ocl-icd-opencl-dev nvidia-opencl-dev
+	apt-get install -y libssl-dev yasm libgmp-dev libpcap-dev libnss3-dev libkrb5-dev pkg-config libbz2-dev zlib1g-dev opencl-headers ocl-icd-libopencl1 ocl-icd-opencl-dev
+	apt-cache search nvidia-opencl-dev | grep "nvidia-opencl-dev" >/dev/null
+	if [ $? -eq 0 ]
+	then
+		apt-get install -y nvidia-opencl-dev
+	fi
 else
-	apt-get install -qq -y libssl-dev yasm libgmp-dev libpcap-dev libnss3-dev libkrb5-dev pkg-config libbz2-dev zlib1g-dev opencl-headers ocl-icd-libopencl1 ocl-icd-opencl-dev nvidia-opencl-dev
+	apt-get install -qq -y libssl-dev yasm libgmp-dev libpcap-dev libnss3-dev libkrb5-dev pkg-config libbz2-dev zlib1g-dev opencl-headers ocl-icd-libopencl1 ocl-icd-opencl-dev
+	apt-cache search nvidia-opencl-dev | grep "nvidia-opencl-dev" >/dev/null
+	if [ $? -eq 0 ]
+	then
+		apt-get install -qq -y nvidia-opencl-dev
+	fi
 fi
 
 REXGEN=1
@@ -121,7 +144,7 @@ then
 fi
 if [ $REXGEN -eq 1 ]
 then
-	echo -e "Building/installing Rexgen v2.0.8 for John the Ripper..."
+	echo -e "\nBuilding/installing Rexgen v2.0.8 for John the Ripper...\n"
 	if [ $VERBOSE -eq 1 ]
 	then
 		apt-get install -y cmake bison flex
@@ -149,14 +172,14 @@ then
 	VER=`rexgen -v 2>&1 | head -n1 | cut -d"-" -f 2`
 	if [ "$VER" == "2.0.8" ]
 	then
-		echo -e "Rexgen v2.0.8 installed!"
+		echo -e "\nRexgen v2.0.8 installed!\n"
 	else
-		echo -e "Errors detected while building/installing Rexgen v2.0.8: John the Ripper will be built without Rexgen support"
+		echo -e "\nErrors detected while building/installing Rexgen v2.0.8: John the Ripper will be built without Rexgen support\n"
 		REXGEN=2
 	fi
 	cd $TMP_DIR
 else
-	echo -e "Rexgen v2.0.8 already installed, skipping!"
+	echo -e "\nRexgen v2.0.8 already installed, skipping!\n"
 fi
 
 echo -e "Building/installing John the Ripper..."
@@ -187,26 +210,34 @@ else
 	make -s clean
 	make -s -j4
 fi
-../run/john --list=opencl-devices 2>&1 | grep "No OpenCL-capable " >/dev/null
-if [ $? -eq 0 ]
+
+if [ -f "../run/john" ]
 then
-	echo -e "Error occurred in john while attempting to communicate with installed GPU(s)!"
-	echo -e "If this system is running inside an ESXi virtual machine, make sure that \"Hardware Passthrough\" is enabled for the GPU device(s) and that the following lines are added to the .vmx file for this VM:"
-	echo -e "\t\thypervisor.cpuid.v0 = FALSE"
-else
-	if [ $VERBOSE -eq 1 ]
+	../run/john --list=opencl-devices 2>&1 | grep "No OpenCL-capable " >/dev/null
+	if [ $? -eq 0 ]
 	then
-		make install
+		echo -e "Error occurred in john while attempting to communicate with installed GPU(s)!"
+		echo -e "If this system is running inside an ESXi virtual machine, make sure that \"Hardware Passthrough\" is enabled for the GPU device(s) and that the following lines are added to the .vmx file for this VM:"
+		echo -e "\t\thypervisor.cpuid.v0 = FALSE"
+		JTR=1
 	else
-		make -s install
+		if [ $VERBOSE -eq 1 ]
+		then
+			make install
+		else
+			make -s install
+		fi
+		cd ../run
+		mkdir -p /usr/share/john
+		rm -rf /usr/share/john/*
+		cp -prf * /usr/share/john/
+		chmod -R a+w /usr/share/john
+		echo -e "\nJohn the Ripper built and installed successfully to /usr/share/john!"
+		JTR=0
 	fi
-	cd ../run
-	mkdir -p /usr/share/john
-	rm -rf /usr/share/john/*
-	cp -prf * /usr/share/john/
-	chmod -R a+w /usr/share/john
-	echo -e "\njohn built and installed successfully to /usr/share/john!"
-	JTR=0
+else
+	echo -e "Error occurred while building John the Ripper! Not built or installed!"
+	JTR=2
 fi
 #end build/install john#
 
@@ -228,10 +259,13 @@ then
 	echo -e "\nhashcat built and installed system-wide successfully!"
 	echo -e "To ensure all is working, hashcat installation should be tested as follows (will likely take a long time to complete!):"
 	echo -e "\thashcat --benchmark"
-else
-	echo -e "hashcat built successfully but was unable to communicate with GPU device(s), so was not installed. Please resolve this issue then re-execute stage 3 as root to install hashcat"
+elif [ $HC -eq 1 ]
+then
+	echo -e "\nhashcat built successfully but was unable to communicate with GPU device(s), so was not installed. Please resolve this issue then re-execute stage 3 as root to install hashcat"
 	echo -e "If this system is running inside an ESXi virtual machine, make sure that \"Hardware Passthrough\" is enabled for the GPU device(s) and that the following lines are added to the .vmx file for this VM:"
 	echo -e "\t\thypervisor.cpuid.v0 = FALSE"
+else
+	echo -e "\nErrors occurred while building hashcat! Please re-execute Stage 3 with the --verbose command-line option to identify and issues to resolve."
 fi
 if [ $JTR -eq 0 ]
 then
@@ -239,10 +273,13 @@ then
 	echo -e "To ensure all is working, the installation should be tested as follows (will likely take a long time to complete!):"
 	echo -e "\tcd /usr/share/john\n\t./john --test=0 --format=opencl"
 	echo -e "\t\tNOTE: This will only test GPU-enabled crack formats using the first GPU. To test additional GPUs, consult the John GPU page: https://openwall.info/wiki/john/GPU)"
-else
-	echo -e "John the Ripper built successfully, but was unable to communicate with GPU device(s), so was not installed. Please resolve this issue then re-execute stage 3 as root to install John the Ripper"
+elif [ $JTR -eq 1 ]
+then
+	echo -e "\nJohn the Ripper built successfully, but was unable to communicate with GPU device(s), so was not installed. Please resolve this issue then re-execute stage 3 as root to install John the Ripper"
 	echo -e "If this system is running inside an ESXi virtual machine, make sure that \"Hardware Passthrough\" is enabled for the GPU device(s) and that the following lines are added to the .vmx file for this VM:"
 	echo -e "\t\thypervisor.cpuid.v0 = FALSE"
+else
+	echo -e "\nErrors occurred while building John the Ripper! Please re-execute Stage 3 with the --verbose command-line option to identify and issues to resolve."
 fi
 if [ $HC -eq 0 ] && [ $JTR -eq 0 ]
 then
