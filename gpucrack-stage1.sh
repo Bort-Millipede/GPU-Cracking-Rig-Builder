@@ -1,7 +1,7 @@
 #! /bin/bash
 
-# Stage 1 v0.1.3
-# 5/12/2020
+# Stage 1 v0.1.4
+# 4/XX/2021
 
 ###start stage 1###
 echo -e "GPU Password Cracking Rig Builder (NVIDIA only) v0.1.3"
@@ -61,7 +61,7 @@ then
 	apt-get -y full-upgrade
 else
 	apt-get -y -qq update
-	apt-get -y -qq dist-upgrade
+	apt-get -y -qq full-upgrade
 fi
 sync
 

@@ -14,7 +14,7 @@ Bash scripts to automatically setup a GPU cracking rig from a base-install of a 
 	3. ```cd GPU-Cracking-Rig-Builder```
 	4. ```chmod +x *.sh```
 2. Execute Stage 1 (gpucrack-stage1.sh) as root (or with sudo) and reboot.
-3. Execute Stage 2 (gpucrack-stage2.sh) as root (or with sudo). If instructed at the end of execution, reboot and re-execute Stage 2 as root.
+3. Execute Stage 2 (gpucrack-stage2.sh) as root (or with sudo). If instructed at the end of execution, reboot and re-execute Stage 2 as root (or with sudo).
 4. Execute Stage 3 (gpucrack-stage3.sh) as root (or with sudo).
 5. (Recommended) Run test suites of both hashcat and john (will likely take a long time to complete!):
 	1. ```hashcat --benchmark```
@@ -25,13 +25,14 @@ Bash scripts to automatically setup a GPU cracking rig from a base-install of a 
 ## Command-Line Options
 The following command line options are available for the stage scripts:
 * ```--verbose``` (all stages): Verbose script output. By default, the stages attempt to suppress most command output (within reason) and execute as "quietly" as possible. Use this option to enable full output during script execution.
-* ```--keep-tmp``` (stages 2 and 3): Do not remove the temporary directory (and all its contents) after successful script completion. Stages 2 and 3 create a temporary "gpucrack-tmp" directory for storing the NVIDIA driver installer and the build directories (hashcat, rexgen, john), which is subsequently deleted after successful script completion. Use this option to keep the "gpucrack-tmp" directory after completion.
+* ```--keep-tmp``` (stages 2 and 3): Do not remove the temporary directory (and all its contents) after successful script completion. Stages 2 and 3 create a temporary "gpucrack-tmp" directory for storing the NVIDIA driver installer and the build directories (hashcat, rexgen, john), which is subsequently deleted after successful script execution. Use this option to keep the "gpucrack-tmp" directory after execution.
+* ```--force-rexgen``` (stage 3): Overwrite current rexgen installation with rexgen v2.0.9 (commit 5b2f4b159ec948c1f9429eca4389ca2adc9c0b07, the last known commit to be compatible with John the Ripper), even if the current installation is detected to be rexgen v2.0.9
 
 # Development Notes
 The bash scripts were developed and tested using the following setup:
 
 * HP Z800 Server Workstation with dual NVIDIA Quadro K600 GPUs installed.
-* VMWare ESXi 6.5 installed, "Hardware Passthrough" configured for both NVIDIA cards.
+* VMWare ESXi 6.7 installed, "Hardware Passthrough" configured for both NVIDIA cards.
 * VMs created with the following specifications/configurations:
 	* 4 or more CPUs
 	* 16GB or higher Memory
@@ -49,6 +50,7 @@ Resources leveraged during development are as follows:
 * [https://openwall.info/wiki/john/tutorials/Ubuntu-build-howto](https://openwall.info/wiki/john/tutorials/Ubuntu-build-howto)
 * [https://help.ubuntu.com/community/NvidiaManual](https://help.ubuntu.com/community/NvidiaManual)
 * [https://github.com/magnumripper/JohnTheRipper/blob/bleeding-jumbo/doc/INSTALL-UBUNTU](https://github.com/magnumripper/JohnTheRipper/blob/bleeding-jumbo/doc/INSTALL-UBUNTU)
+* [https://github.com/openwall/john/blob/bleeding-jumbo/doc/README.librexgen](https://github.com/openwall/john/blob/bleeding-jumbo/doc/README.librexgen)
 
 ## Desktop System Support
 These scripts have not been thoroughly tested with systems running a graphical desktop environment! There is a distinct possibility that the NVIDIA drivers installed by Stage 2 will cause the graphical desktop to stop functioning properly unless the X server is reconfigured. The developer makes no promises of support for systems with a graphical desktop environment installed.
@@ -60,5 +62,5 @@ These scripts have NOT been thoroughly tested with Kali Linux! They may work fin
 The developer provides the software for free without warranty, and assume no responsibility for any damage caused to systems by using the software. It is the responsibility of the user to abide by all local, state and federal laws while using the software.
 
 # Copyright
-(C) 2017, 2018, 2020 Jeffrey Cap (Bort_Millipede)
+(C) 2017, 2021 Jeffrey Cap (Bort_Millipede)
 

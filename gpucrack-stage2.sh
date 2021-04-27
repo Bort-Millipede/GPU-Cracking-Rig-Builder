@@ -1,7 +1,7 @@
 #! /bin/bash
 
-# Stage 2 v0.1.3
-# 5/12/2020
+# Stage 2 v0.1.4
+# 4/XX/2021
 
 ###start stage 2###
 echo -e "GPU Password Cracking Rig Builder (NVIDIA only) v0.1.3"
@@ -50,7 +50,7 @@ ORIG_DIR=`pwd`
 TMP_DIR="$ORIG_DIR/gpucrack-tmp"
 mkdir -p $TMP_DIR
 
-echo -e "Installing NVIDIA driver prerequisites, and removing all currently-installed \"nvidia\" packages (if any)."
+echo -e "Installing NVIDIA driver prerequisites, and removing all currently-installed \"nvidia\" packages (if any).\n"
 if [ $VERBOSE -eq 1 ]
 then
 	apt-get install -y build-essential linux-headers-$(uname -r) wget
@@ -59,7 +59,7 @@ else
 	apt-get install -qq -y build-essential linux-headers-$(uname -r) wget
 	apt-get remove --purge -qq -y nvidia* >&/dev/null
 fi
-echo -e "Prerequisites installed!"
+echo -e "Prerequisites installed!\n"
 
 VER=`wget -q -O - https://download.nvidia.com/XFree86/Linux-x86_64/latest.txt | cut -d" " -f 1`
 
@@ -76,7 +76,7 @@ fi
 cd $TMP_DIR
 chmod +x ./NVIDIA
 
-echo -e "Attempting to install NVIDIA driver or blacklist Nouveau."
+echo -e "Attempting to install NVIDIA driver or blacklist Nouveau.\n"
 ./NVIDIA --accept-license --disable-nouveau --no-questions --silent
 if [ $? -eq 2 ]
 then

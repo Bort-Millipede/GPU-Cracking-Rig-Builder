@@ -1,7 +1,7 @@
 #! /bin/bash
 
-# Stage 3 v0.1.3
-# 5/12/2020
+# Stage 3 v0.1.4
+# 4/XX/2021
 
 ###start stage 3###
 echo -e "GPU Password Cracking Rig Builder (NVIDIA only) v0.1.3"
@@ -35,6 +35,7 @@ fi
 
 VERBOSE=0
 KEEPTMP=0
+FORCEREXGEN=0
 for var in "$@"
 do
 	if [ "$var" == "--verbose" ]
@@ -43,7 +44,10 @@ do
 	elif [ "$var" == "--keep-tmp" ]
 	then
 		KEEPTMP=1
-	fi
+	elif [ "$var" == "--force-rexgen" ]
+	then
+		FORCEREXGEN=1
+	fi	
 done
 
 TMP_DIR="gpucrack-tmp"
@@ -137,49 +141,52 @@ which rexgen > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
 	VER=`rexgen -v 2>&1 | head -n1 | cut -d"-" -f 2`
-	if [ "$VER" == "2.0.8" ]
+	if [ "$VER" == "2.0.9" ]
 	then
-		REXGEN=0
+		if [ $FORCEREXGEN -eq 0 ]
+		then
+			REXGEN=0
+		fi
 	fi
 fi
 if [ $REXGEN -eq 1 ]
 then
-	echo -e "\nBuilding/installing Rexgen v2.0.8 for John the Ripper...\n"
+	echo -e "\nBuilding/installing rexgen v2.0.9 (commit 5b2f4b159ec948c1f9429eca4389ca2adc9c0b07) for John the Ripper...\n"
 	if [ $VERBOSE -eq 1 ]
 	then
 		apt-get install -y cmake bison flex
-		git clone https://github.com/vay3t/rexgen-john.git rexgen
+		git clone --recursive https://github.com/janstarke/rexgen.git
 	else
 		apt-get install -qq -y cmake bison flex
-		git clone -q https://github.com/vay3t/rexgen-john.git rexgen
+		git clone -q --recursive https://github.com/janstarke/rexgen.git
 	fi
-	cd rexgen/src/
-	mkdir -p build
-	cd build
+	cd rexgen
 	if [ $VERBOSE -eq 1 ]
 	then
-		cmake ..
-		make
-		make install
+		git checkout 5b2f4b159ec948c1f9429eca4389ca2adc9c0b07
+		./build.sh
+		./install.sh
 		ldconfig
 	else
-		cmake .. >/dev/null
-		make -s >/dev/null
-		make -s install >/dev/null
+		git checkout --quiet 5b2f4b159ec948c1f9429eca4389ca2adc9c0b07
+		alias make='make -s'
+		./build.sh >/dev/null
+		./install.sh >/dev/null
 		ldconfig
+		unalias make
 	fi
 	
 	VER=`rexgen -v 2>&1 | head -n1 | cut -d"-" -f 2`
-	if [ "$VER" == "2.0.8" ]
+	if [ "$VER" == "2.0.9" ]
 	then
-		echo -e "\nRexgen v2.0.8 installed!\n"
+		echo -e "\nrexgen v2.0.9 installed!\n"
 	else
-		echo -e "\nErrors detected while building/installing Rexgen v2.0.8: John the Ripper will be built without Rexgen support\n"
+		echo -e "\nErrors detected while building/installing rexgen v2.0.9: John the Ripper will be built without rexgen support\nIf rexgen support is required, please re-execute Stage 3 with the --verbose command-line option to identify any issues to resolve.\n"
 		REXGEN=2
 	fi
 	cd $TMP_DIR
 else
-	echo -e "\nRexgen v2.0.8 already installed, skipping!\n"
+	echo -e "\nrexgen v2.0.9 already installed, skipping!\n"
 fi
 
 echo -e "Building/installing John the Ripper..."
@@ -279,7 +286,7 @@ then
 	echo -e "If this system is running inside an ESXi virtual machine, make sure that \"Hardware Passthrough\" is enabled for the GPU device(s) and that the following lines are added to the .vmx file for this VM:"
 	echo -e "\t\thypervisor.cpuid.v0 = FALSE"
 else
-	echo -e "\nErrors occurred while building John the Ripper! Please re-execute Stage 3 with the --verbose command-line option to identify and issues to resolve."
+	echo -e "\nErrors occurred while building John the Ripper! Please re-execute Stage 3 with the --verbose command-line option to identify any issues to resolve."
 fi
 if [ $HC -eq 0 ] && [ $JTR -eq 0 ]
 then
@@ -289,7 +296,12 @@ then
 	else
 		echo -e "\nStage 3 temporary files not removed, located at: $TMP_DIR"
 	fi
-	echo -en "\nStage 3 completed successfully! hashcat and john built and installed"
+	echo -en "\nStage 3 completed successfully! hashcat and john"
+	if [ $REXGEN -eq 2 ]
+	then
+		echo -en " (without rexgen support)"
+	fi
+	echo -en " built and installed"
 	if [ $WORDLISTS -eq 1 ]
 	then
 		echo -en ", and Wordlists directory created"
