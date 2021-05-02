@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # Stage 3 v0.1.4
-# 4/XX/2021
+# 5/XX/2021
 
 ###start stage 3###
 echo -e "GPU Password Cracking Rig Builder (NVIDIA only) v0.1.3"
@@ -33,6 +33,15 @@ then
 	exit 1
 fi
 
+modinfo nvidia >/dev/null 2>&1
+if [ $? -ne 0 ]
+then
+	echo -e "WARNING: \"nvidia\" kernel module not found!"
+	echo -e "Continuing with this Stage 3 execution is not recommended! hashcat and John the Ripper may still build successfully during this execution, but will not install and/or function correctly!" 
+	echo -e "Please terminate this Stage 3 execution now! Then, ensure Stage 1 has been executed and Stage 2 has been executed (and re-executed after reboot if required) prior to re-executing Stage 3!\n"
+	sleep 5
+fi
+
 VERBOSE=0
 KEEPTMP=0
 FORCEREXGEN=0
@@ -47,7 +56,7 @@ do
 	elif [ "$var" == "--force-rexgen" ]
 	then
 		FORCEREXGEN=1
-	fi	
+	fi
 done
 
 TMP_DIR="gpucrack-tmp"
@@ -268,11 +277,11 @@ then
 	echo -e "\thashcat --benchmark"
 elif [ $HC -eq 1 ]
 then
-	echo -e "\nhashcat built successfully but was unable to communicate with GPU device(s), so was not installed. Please resolve this issue then re-execute stage 3 as root to install hashcat"
+	echo -e "\nhashcat built successfully but was unable to communicate with GPU device(s), so was not installed. Please resolve this issue then re-execute stage 3 as root to install hashcat!"
 	echo -e "If this system is running inside an ESXi virtual machine, make sure that \"Hardware Passthrough\" is enabled for the GPU device(s) and that the following lines are added to the .vmx file for this VM:"
 	echo -e "\t\thypervisor.cpuid.v0 = FALSE"
 else
-	echo -e "\nErrors occurred while building hashcat! Please re-execute Stage 3 with the --verbose command-line option to identify and issues to resolve."
+	echo -e "\nErrors occurred while building hashcat! Please re-execute Stage 3 with the --verbose command-line option to identify and issues to resolve!"
 fi
 if [ $JTR -eq 0 ]
 then
@@ -282,11 +291,11 @@ then
 	echo -e "\t\tNOTE: This will only test GPU-enabled crack formats using the first GPU. To test additional GPUs, consult the John GPU page: https://openwall.info/wiki/john/GPU)"
 elif [ $JTR -eq 1 ]
 then
-	echo -e "\nJohn the Ripper built successfully, but was unable to communicate with GPU device(s), so was not installed. Please resolve this issue then re-execute stage 3 as root to install John the Ripper"
+	echo -e "\nJohn the Ripper built successfully, but was unable to communicate with GPU device(s), so was not installed. Please resolve this issue then re-execute stage 3 as root to install John the Ripper!"
 	echo -e "If this system is running inside an ESXi virtual machine, make sure that \"Hardware Passthrough\" is enabled for the GPU device(s) and that the following lines are added to the .vmx file for this VM:"
 	echo -e "\t\thypervisor.cpuid.v0 = FALSE"
 else
-	echo -e "\nErrors occurred while building John the Ripper! Please re-execute Stage 3 with the --verbose command-line option to identify any issues to resolve."
+	echo -e "\nErrors occurred while building John the Ripper! Please re-execute Stage 3 with the --verbose command-line option to identify any issues to resolve!"
 fi
 if [ $HC -eq 0 ] && [ $JTR -eq 0 ]
 then

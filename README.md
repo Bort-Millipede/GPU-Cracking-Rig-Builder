@@ -8,7 +8,7 @@ Bash scripts to automatically setup a GPU cracking rig from a base-install of a 
 * Stage 3: Build hashcat from source with GPU support and install; Build John the Ripper from source with GPU support and install (to /usr/share/john); create directory for wordlists (/usr/share/wordlists) if not already created.
 
 # Usage
-1. Download the project master.zip, extract, navigate to the GPU-Cracking-Rig-Builder and add execute permissions to the stage scripts.
+1. Download the project master.zip, extract, navigate to the GPU-Cracking-Rig-Builder and add execute permissions to the Stage scripts.
 	1. (execute as root) ```apt install -y git```
 	2. ```git clone https://github.com/Bort-Millipede/GPU-Cracking-Rig-Builder.git```
 	3. ```cd GPU-Cracking-Rig-Builder```
@@ -19,14 +19,14 @@ Bash scripts to automatically setup a GPU cracking rig from a base-install of a 
 5. (Recommended) Run test suites of both hashcat and john (will likely take a long time to complete!):
 	1. ```hashcat --benchmark```
 	2. ```cd /usr/share/john; ./john --test=0 --format=opencl```
-		* NOTE: This will only test john with GPU-enabled crack formats with the first GPU. To test additional GPUs, consult the John GPU page: [https://openwall.info/wiki/john/GPU](https://openwall.info/wiki/john/GPU)
+		* NOTE: This will only test John with GPU-enabled crack formats with the first GPU. To test additional GPUs, consult the John the Ripper GPU page: [https://openwall.info/wiki/john/GPU](https://openwall.info/wiki/john/GPU)
 6. To use hashcat, execute ```hashcat ...``` from any location. To use john: ```cd /usr/share/john; ./john ...```
 
 ## Command-Line Options
-The following command line options are available for the stage scripts:
-* ```--verbose``` (all stages): Verbose script output. By default, the stages attempt to suppress most command output (within reason) and execute as "quietly" as possible. Use this option to enable full output during script execution.
-* ```--keep-tmp``` (stages 2 and 3): Do not remove the temporary directory (and all its contents) after successful script completion. Stages 2 and 3 create a temporary "gpucrack-tmp" directory for storing the NVIDIA driver installer and the build directories (hashcat, rexgen, john), which is subsequently deleted after successful script execution. Use this option to keep the "gpucrack-tmp" directory after execution.
-* ```--force-rexgen``` (stage 3): Overwrite current rexgen installation with rexgen v2.0.9 (commit 5b2f4b159ec948c1f9429eca4389ca2adc9c0b07, the last known commit to be compatible with John the Ripper), even if the current installation is detected to be rexgen v2.0.9
+The following command line options are available for the Stage scripts:
+* ```--verbose``` (all Stages): Verbose script output. By default, the Stages attempt to suppress most command output (within reason) and execute as "quietly" as possible. Use this option to enable full output during script execution.
+* ```--keep-tmp``` (Stages 2 and 3): Do not remove the temporary directory (and all its contents) after successful script completion. Stages 2 and 3 create a temporary "gpucrack-tmp" directory for storing the NVIDIA driver installer and the build directories (hashcat, rexgen, john), which is subsequently deleted after successful script execution. Use this option to keep the "gpucrack-tmp" directory after execution.
+* ```--force-rexgen``` (Stage 3): Overwrite current rexgen installation with rexgen v2.0.9 ([commit 5b2f4b159ec948c1f9429eca4389ca2adc9c0b07](https://github.com/janstarke/rexgen/tree/5b2f4b159ec948c1f9429eca4389ca2adc9c0b07), the last known commit to be compatible with John the Ripper), even if the current installation is detected to be rexgen v2.0.9.
 
 # Development Notes
 The bash scripts were developed and tested using the following setup:
