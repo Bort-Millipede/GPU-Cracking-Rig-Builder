@@ -1,12 +1,12 @@
 #! /bin/bash
 
-# Stage 3 v0.1.4
-# 5/XX/2021
+# Stage 3 v0.2
+# 7/XX/2021
 
-###start stage 3###
-echo -e "GPU Password Cracking Rig Builder (NVIDIA only) v0.1.3"
-echo -e "Jeffrey Cap (Bort-Millipede, https://twitter.com/Bort_Millipede)"
-echo -e "\nStage 3: install hashcat and John the Ripper with GPU support, and create wordlists directory (if not already created)\n"
+###start Stage 3###
+echo -e "GPU Password Cracking Rig Builder (NVIDIA only) v0.2"
+echo -e "Jeffrey Cap (Bort-Millipede)"
+echo -e "\nStage 3: install hashcat and John the Ripper with GPU support, install hashid, and create wordlists directory (if not already created)\n"
 
 if [[ $EUID -ne 0 ]]
 then
@@ -29,7 +29,7 @@ fi
 apt-get -qq install `dpkg --get-selections | grep "install" | cut -f1 | head -n1` >/dev/null 2>&1
 if [ $? -ne 0 ]
 then
-	echo -e "Possible error detected in the package manager! Ensure apt/dpkg are working properly and not in use by other processes, then try executing Stage 3 as root again!"
+	echo -e "Possible error detected in the package manager! Ensure apt/dpkg are working properly and are not in use by other processes, then try executing Stage 3 as root again!"
 	exit 1
 fi
 
@@ -38,7 +38,7 @@ if [ $? -ne 0 ]
 then
 	echo -e "WARNING: \"nvidia\" kernel module not found!"
 	echo -e "Continuing with this Stage 3 execution is not recommended! hashcat and John the Ripper may still build successfully during this execution, but will not install and/or function correctly!" 
-	echo -e "Please terminate this Stage 3 execution now! Then, ensure Stage 1 has been executed and Stage 2 has been executed (and re-executed after reboot if required) prior to re-executing Stage 3!\n"
+	echo -e "Please terminate this Stage 3 execution now! Then (as root) ensure Stage 1 has been executed and Stage 2 has been executed (and re-executed after reboot if required) prior to re-executing Stage 3!\n"
 	sleep 5
 fi
 
@@ -67,9 +67,9 @@ TMP_DIR=`pwd`
 
 if [ $VERBOSE -eq 1 ]
 then
-	apt-get install git -y
+	apt-get install -y git build-essential
 else
-	apt-get install git -qq -y >/dev/null 2>&1
+	apt-get install -qq -y git build-essential >/dev/null 2>&1
 fi
 
 #build/install hashcat#
@@ -103,6 +103,7 @@ then
 	if [ $? -eq 255 ]
 	then
 		echo -e "Error occurred in hashcat while attempting to communicate with installed GPU(s)!"
+		echo -e "Ensure that NVIDIA drivers have been installed properly via Stage 2!"
 		echo -e "If this system is running inside an ESXi virtual machine, make sure that \"Hardware Passthrough\" is enabled for the GPU device(s) and that the following configuration parameter is added to this VM:"
 		echo -e "\t\thypervisor.cpuid.v0 = FALSE"
 		echo -e "\nhashcat built, but not installed system-wide!\n"
@@ -114,11 +115,11 @@ then
 		else
 			make -s install
 		fi
-		echo -e "hashcat built and installed system-wide successfully!\n"
+		echo -e "\nhashcat built and installed system-wide successfully!\n"
 		HC=0
 	fi
 else
-	echo -e "Error occurred while building hashcat! Not built or installed system-wide!\n"
+	echo -e "\nError occurred while building hashcat! Not built or installed system-wide!\n"
 	HC=2
 fi
 
@@ -163,13 +164,18 @@ then
 	echo -e "\nBuilding/installing rexgen v2.0.9 (commit 5b2f4b159ec948c1f9429eca4389ca2adc9c0b07) for John the Ripper...\n"
 	if [ $VERBOSE -eq 1 ]
 	then
-		apt-get install -y cmake bison flex
+		apt-get install -y cmake bison flex sed
 		git clone --recursive https://github.com/janstarke/rexgen.git
 	else
-		apt-get install -qq -y cmake bison flex
+		apt-get install -qq -y cmake bison flex sed
 		git clone -q --recursive https://github.com/janstarke/rexgen.git
 	fi
 	cd rexgen
+	which sudo >/dev/null
+	if [ $? -eq 1 ]
+	then
+		sed -i.bak -e "s/sudo make/make/g" install.sh	
+	fi
 	if [ $VERBOSE -eq 1 ]
 	then
 		git checkout 5b2f4b159ec948c1f9429eca4389ca2adc9c0b07
@@ -178,11 +184,11 @@ then
 		ldconfig
 	else
 		git checkout --quiet 5b2f4b159ec948c1f9429eca4389ca2adc9c0b07
-		alias make='make -s'
+		sed -i.bak -e "s/\&\& make/\&\& make -s/g" build.sh
+		sed -i -e "s/make install/make -s install/g" install.sh
 		./build.sh >/dev/null
 		./install.sh >/dev/null
 		ldconfig
-		unalias make
 	fi
 	
 	VER=`rexgen -v 2>&1 | head -n1 | cut -d"-" -f 2`
@@ -195,10 +201,15 @@ then
 	fi
 	cd $TMP_DIR
 else
-	echo -e "\nrexgen v2.0.9 already installed, skipping!\n"
+	echo -e "rexgen v2.0.9 already installed, skipping!\n"
 fi
 
-echo -e "Building/installing John the Ripper..."
+echo -en "Building/installing John the Ripper"
+if [ $REXGEN -eq 2 ]
+then
+	echo -en " (without rexgen support)"
+fi
+echo -e "..."
 if [ $VERBOSE -eq 1 ]
 then
 	git clone git://github.com/magnumripper/JohnTheRipper -b bleeding-jumbo john
@@ -232,9 +243,11 @@ then
 	../run/john --list=opencl-devices 2>&1 | grep "No OpenCL-capable " >/dev/null
 	if [ $? -eq 0 ]
 	then
-		echo -e "Error occurred in john while attempting to communicate with installed GPU(s)!"
+		echo -e "Error occurred in John the Ripper while attempting to communicate with installed GPU(s)!"
+		echo -e "Ensure that NVIDIA drivers have been installed properly via Stage 2!"
 		echo -e "If this system is running inside an ESXi virtual machine, make sure that \"Hardware Passthrough\" is enabled for the GPU device(s) and that the following lines are added to the .vmx file for this VM:"
 		echo -e "\t\thypervisor.cpuid.v0 = FALSE"
+		echo -e "\nJohn the Ripper built, but not installed system-wide!\n"
 		JTR=1
 	else
 		if [ $VERBOSE -eq 1 ]
@@ -248,16 +261,26 @@ then
 		rm -rf /usr/share/john/*
 		cp -prf * /usr/share/john/
 		chmod -R a+w /usr/share/john
-		echo -e "\nJohn the Ripper built and installed successfully to /usr/share/john!"
+		echo -e "\nJohn the Ripper built and installed successfully to /usr/share/john!\n"
 		JTR=0
 	fi
 else
-	echo -e "Error occurred while building John the Ripper! Not built or installed!"
+	echo -e "\nError occurred while building John the Ripper! Not built or installed!\n"
 	JTR=2
 fi
 #end build/install john#
 
 cd $ORIG_DIR
+
+#install hashid
+if [ $VERBOSE -eq 1 ]
+then
+	apt-get install -y hashid
+else
+	apt-get install -qq -y hashid
+fi
+echo -e "hashid installed!"
+#end install hashid
 
 #create wordlists directory (if not already created)#
 WORDLISTS=0
@@ -277,7 +300,7 @@ then
 	echo -e "\thashcat --benchmark"
 elif [ $HC -eq 1 ]
 then
-	echo -e "\nhashcat built successfully but was unable to communicate with GPU device(s), so was not installed. Please resolve this issue then re-execute stage 3 as root to install hashcat!"
+	echo -e "\nhashcat built successfully but was unable to communicate with GPU device(s), so was not installed. Please ensure that NVIDIA drivers have been installed properly via Stage 2, then re-execute Stage 3 as root to install hashcat!"
 	echo -e "If this system is running inside an ESXi virtual machine, make sure that \"Hardware Passthrough\" is enabled for the GPU device(s) and that the following lines are added to the .vmx file for this VM:"
 	echo -e "\t\thypervisor.cpuid.v0 = FALSE"
 else
@@ -288,10 +311,10 @@ then
 	echo -e "\nJohn the Ripper built and installed to /usr/share/john successfully!"
 	echo -e "To ensure all is working, the installation should be tested as follows (will likely take a long time to complete!):"
 	echo -e "\tcd /usr/share/john\n\t./john --test=0 --format=opencl"
-	echo -e "\t\tNOTE: This will only test GPU-enabled crack formats using the first GPU. To test additional GPUs, consult the John GPU page: https://openwall.info/wiki/john/GPU)"
+	echo -e "\t\tNOTE: This will only test GPU-enabled crack formats using the first GPU. To test additional GPUs, consult the John the Ripper GPU page: https://openwall.info/wiki/john/GPU"
 elif [ $JTR -eq 1 ]
 then
-	echo -e "\nJohn the Ripper built successfully, but was unable to communicate with GPU device(s), so was not installed. Please resolve this issue then re-execute stage 3 as root to install John the Ripper!"
+	echo -e "\nJohn the Ripper built successfully, but was unable to communicate with GPU device(s), so was not installed. Please ensure that NVIDIA drivers have been installed properly via Stage 2, then re-execute Stage 3 as root to install John the Ripper!"
 	echo -e "If this system is running inside an ESXi virtual machine, make sure that \"Hardware Passthrough\" is enabled for the GPU device(s) and that the following lines are added to the .vmx file for this VM:"
 	echo -e "\t\thypervisor.cpuid.v0 = FALSE"
 else
@@ -305,7 +328,7 @@ then
 	else
 		echo -e "\nStage 3 temporary files not removed, located at: $TMP_DIR"
 	fi
-	echo -en "\nStage 3 completed successfully! hashcat and john"
+	echo -en "\nStage 3 completed successfully! hashcat and John the Ripper"
 	if [ $REXGEN -eq 2 ]
 	then
 		echo -en " (without rexgen support)"
@@ -313,11 +336,13 @@ then
 	echo -en " built and installed"
 	if [ $WORDLISTS -eq 1 ]
 	then
-		echo -en ", and Wordlists directory created"
+		echo -en ", hashid installed, and Wordlists directory created"
+	else
+		echo -en ", and hashid installed"
 	fi
-	echo -e "!"
+	echo -e "! Please reboot before benchmarking and using hashcat and John the Ripper!\n"
 else
-	echo -e "\nStage 3 completed with errors. Please resolve the issue(s), then re-execute stage 3 as root to install hashcat and john"
+	echo -e "\nStage 3 completed with errors. Please resolve the issue(s), then re-execute Stage 3 as root to install hashcat and John the Ripper\n"
 fi
 
 unset TMP_DIR
@@ -327,5 +352,5 @@ unset JTR
 unset VERBOSE
 unset KEEPTMP
 unset REXGEN
-###end stage 3###
+###end Stage 3###
 

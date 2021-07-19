@@ -1,11 +1,11 @@
 #! /bin/bash
 
-# Stage 1 v0.1.4
-# 4/XX/2021
+# Stage 1 v0.2
+# 7/XX/2021
 
-###start stage 1###
-echo -e "GPU Password Cracking Rig Builder (NVIDIA only) v0.1.3"
-echo -e "Jeffrey Cap (Bort-Millipede, https://twitter.com/Bort_Millipede)"
+###start Stage 1###
+echo -e "GPU Password Cracking Rig Builder (NVIDIA only) v0.2"
+echo -e "Jeffrey Cap (Bort-Millipede)"
 echo -e "\nStage 1: remove multiarch (32-bit) support from operating system (if enabled), and install all available updates.\n"
 
 if [[ $EUID -ne 0 ]]
@@ -29,7 +29,7 @@ fi
 apt-get -qq install `dpkg --get-selections | grep "install" | cut -f1 | head -n1` >/dev/null 2>&1
 if [ $? -ne 0 ]
 then
-	echo -e "Possible error detected in the package manager! Ensure apt/dpkg are working properly and not in use by other processes, then try executing Stage 1 as root again!"
+	echo -e "Possible error detected in the package manager! Ensure apt/dpkg are working properly and are not in use by other processes, then try executing Stage 1 as root again!"
 	exit 1
 fi
 
@@ -57,11 +57,11 @@ fi
 echo -e "\nUpdating system..."
 if [ $VERBOSE -eq 1 ]
 then
-	apt-get -y update
-	apt-get -y full-upgrade
+	apt-get update -y
+	apt-get full-upgrade -y
 else
-	apt-get -y -qq update
-	apt-get -y -qq full-upgrade
+	apt-get update -y -qq 
+	apt-get full-upgrade -y -qq
 fi
 sync
 
@@ -71,8 +71,8 @@ then
 	echo -en "32-bit support removed and "
 fi
 echo -e "System updated!"
-echo -e "Stage 1 completed successfully! Please reboot and execute Stage 2 as root."
+echo -e "Stage 1 completed successfully! Please reboot and execute Stage 2 as root.\n"
 unset MULTIARCH
 unset VERBOSE
-###end stage 1###
+###end Stage 1###
 
