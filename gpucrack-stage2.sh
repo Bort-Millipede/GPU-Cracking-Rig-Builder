@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # Stage 2 v0.2
-# 7/XX/2021
+# 7/22/2021
 
 ###start Stage 2###
 echo -e "GPU Password Cracking Rig Builder (NVIDIA only) v0.2"

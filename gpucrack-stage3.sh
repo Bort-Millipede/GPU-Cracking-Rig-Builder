@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # Stage 3 v0.2
-# 7/XX/2021
+# 7/22/2021
 
 ###start Stage 3###
 echo -e "GPU Password Cracking Rig Builder (NVIDIA only) v0.2"
@@ -341,6 +341,7 @@ then
 		echo -en ", and hashid installed"
 	fi
 	echo -e "! Please reboot before benchmarking and using hashcat and John the Ripper!\n"
+	echo -e "Additionally, be sure measures have been put in place to address automatic GPU fan control (which is not addressed by the Stages)!\n"
 else
 	echo -e "\nStage 3 completed with errors. Please resolve the issue(s), then re-execute Stage 3 as root to install hashcat and John the Ripper\n"
 fi
